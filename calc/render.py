@@ -3,7 +3,6 @@ import pandas as pd
 import argh
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-
 def render(template_path, displayed_lanes, stat_table, output_path):
 	'''
 	This function is generating html page using Jinja2.
