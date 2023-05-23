@@ -511,22 +511,30 @@
 		h2.sub { font-size: 100%; font-weight: normal; color: #666; margin: 0; }
 		h2 { font-size: 125%; margin: 1.5em 0 .5em; color: #444; font-weight: normal; }
 
+		table tbody tr:hover { background-color: yellow; }
+		tbody tr.active {
+			background: yellow;
+			color: #000;
+		}
+
 		.float-r { float: right; }
 		a { color: hsl(196, 80%, 28%); }
 		a:visited { color: hsl(296, 80%, 28%) }
-		a:hover, a:active { color: hsl(196, 80%, 58%); }
+		a:hover, a:active { color: hsl(196, 80%, 58%); } 
 
-		a.under-dash, a.under-dash:visited { color: #000; text-decoration: none; border-bottom: 1px dashed #aaa; }
+		a.under-dash, a.under-dash:visited { color: #000; text-decoration: none; border-bottom: 0px dashed #aaa; }
 		body {
 			margin:0; padding:0;
 			font-family: 'PT Sans', sans-serif; }
 		.r { text-align: right; }
 		td.font-x-large { font-size: x-large; }
 		#mobile-table { display: none; }
+		.hidden { display: none; }
 
 		.xs-show { display: none; }
 		.padding5-b { padding-bottom: .5em; }
 		.padding5 { padding: .5em; }
+		.padding0-b { padding-bottom: 0 }
 		.padding15 { padding: 1.5em; }
 		.expand { width: 100%; box-sizing: margin; }
 
@@ -573,13 +581,13 @@
 				background: #fff;
 			}
 			table tr:nth-child(4n), table tr:nth-child(4n-1) { background: #eee; }
-			table tr.gold { background: #ffe688; }
-			table tr:nth-child(4n).gold, table tr:nth-child(4n-1).gold { background: #ffd844; }
-
 			#mobile-table td:last-child {
 				padding-right: 1em;
 			}
 			.scroll-container { box-shadow: inset 0px 12px 6px -10px rgba(0,0,0,.3); }
+			table tr.gold { background: #ffe688; }
+			table tr:nth-child(4n).gold, table tr:nth-child(4n-1).gold { background: #ffd844; }
+			
 		}
 
 		@media screen and (min-device-width: 1025px) {
@@ -600,15 +608,21 @@
 				right: 0;
 			}
 			#desktop-table > .scroll-container { background: #fff; }
-
-			#desktop-table table { margin-top: 1em; width: 100%; }
+			#desktop-table table { width: 100%; }
 			#desktop-table td:last-child { padding-right: .7em; }
 			#desktop-table td:first-child { padding-left: .7em; }
 			#desktop-table table thead { background: #ddd; }
-			table tr.gold { background: #ffe688; }
-			table tr:nth-child(even) { background: #eee; }
+			table tr.gold { background: yellow; }
+			table tr:nth-child() { background: #eee; }
 			table tr:nth-child(even).gold { background: #ffd844; }
+
+			.margin1-t { margin-top: 1em; }
 		}
+
+		.iblock { display: inline-block; }
+		.toggle-button { color: #444; cursor: pointer; background: #bbb; }
+		.toggle-button:active { padding: .5em .4em .4em .5em; top: .1em; left: .1em; position: relative; }
+		.active-switch { font-weight: bold; background: #ddd; }
 
 		#mobile-table::-webkit-scrollbar, #desktop-table::-webkit-scrollbar { width: 8px; background-color: rgba(255,255,255,0); }
 		#mobile-table::-webkit-scrollbar-thumb, #desktop-table::-webkit-scrollbar-thumb { background-color: #999; border-radius: 4px; }
@@ -633,10 +647,12 @@
 	{% with platform='desktop' %}
 		<div id='desktop-table' class='xs-hide'>
 			<div class='scroll-container'>
-				<div class='padding5'>
+				<div class='padding5 padding0-b'>
 					{% include 'heading.html' %}
 				</div>
-				<table class='sortable'>
+				{# большие города #}
+				{% with cities=big_cities %}
+					<table class='sortable js-table {{ extra_class }}'>
 					<thead>
 						<tr title='Нажмите чтобы отсортировать по колонке'>
 							<td class='r'>№</td>
@@ -648,7 +664,7 @@
 					</thead>
 					<tbody>
 						{% for city in cities %}
-							<tr {% if loop.index < 6 %}class='gold'{% endif %}>
+							<tr {% if loop.index < 2 %}class='active'{% endif %}>
 								<td class='r'>{{ loop.index }}</td>
 								<td><a href='#' data-extent='[[{{ city.minx }}, {{city.miny}}], [{{ city.maxx }}, {{ city.maxy }}]]'  class='js-go-to-city under-dash' title='Нажмите чтобы увидеть на карте'>{{ city.short_name }}</a></td>
 								<td class='r xs-hide'>{{ (city.lanes_length/1000)|round(1) }}</td>
@@ -657,7 +673,33 @@
 							</tr>
 						{% endfor %}
 					</tbody>
-				</table>
+					</table>
+				{% endwith %}
+				{# малые города #}
+				{% with extra_class='hidden', cities=small_cities %}
+					<table class='sortable js-table {{ extra_class }}'>
+					<thead>
+						<tr title='Нажмите чтобы отсортировать по колонке'>
+							<td class='r'>№</td>
+							<td>город</td>
+							<td class='r xs-hide'>длина ВП<br> (км)</td>
+							<td class='r xs-hide'>жители<br> (тыс.)</td>
+							<td class='r'>ВП<br> (м/1000 чел.)</td>
+						</tr>
+					</thead>
+					<tbody>
+						{% for city in cities %}
+							<tr {% if loop.index < 0 %}class='gold'{% endif %}> 
+								<td class='r'>{{ loop.index }}</td>
+								<td><a href='#' data-extent='[[{{ city.minx }}, {{city.miny}}], [{{ city.maxx }}, {{ city.maxy }}]]'  class='js-go-to-city under-dash' title='Нажмите чтобы увидеть на карте'>{{ city.short_name }}</a></td>
+								<td class='r xs-hide'>{{ (city.lanes_length/1000)|round(1) }}</td>
+								<td class='r xs-hide'>{{ (city.population/1000)|round(0)|int }}</td>
+								<td class='r'>{{ city.lanes_per_1K|round(1) }}</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+					</table>
+				{% endwith %}
 				<div class='padding15'>
 					{% include 'info.html' %}
 				</div>
@@ -669,9 +711,10 @@
 
 	{% with platform='mobile' %}
 		<div id='mobile-table' class='xs-show'>
-			<div class='padding5'>
+			<div class='padding5 padding0-b'>
 				{% include 'heading.html' %}
 			</div>
+
 			<table id='table-header'>
 				<tr>
 					<td class='r font-x-large'>&equiv;</td>
@@ -679,23 +722,46 @@
 					<td class='r'>ВП (м/1000 чел.)</td>
 				</tr>
 			</table>
+			
 			<div class='scroll-container'>
-				<table class='expand'>
-					{% for city in cities %}
-						<tr {% if loop.index < 6 %}class='gold'{% endif %}>
-							<td class='r'>{{ loop.index }}</td>
-							<td class='font-larger'><a href='#' data-extent='[[{{ city.minx }}, {{city.miny}}], [{{ city.maxx }}, {{ city.maxy }}]]' class='js-go-to-city'>{{ city.short_name }}</a></td>
-							<td class='font-larger r'>{{ city.lanes_per_1K|round(1) }}</td>
-						</tr>
-						<tr class='xs-show  {% if loop.index < 6 %}gold{% endif %}'>
-							<td></td>
-							<td colspan='2' class='padding5-b font-smaller'>
-								{{ (city.lanes_length/1000)|round(1) }} км,
-								{{ (city.population/1000)|round(0)|int }} тыс.чел.
-							</td>
-						</tr>
-					{% endfor %}
-				</table>
+				{# большие города #}
+				{% with cities=big_cities %}			
+					<table class='expand js-table {{ extra_class }}'>
+						{% for city in cities %}
+							<tr {% if loop.index < 2 %}class='active'{% endif %}>
+								<td class='r'>{{ loop.index }}</td>
+								<td class='font-larger'><a href='#' data-extent='[[{{ city.minx }}, {{city.miny}}], [{{ city.maxx }}, {{ city.maxy }}]]' class='js-go-to-city'>{{ city.short_name }}</a></td>
+								<td class='font-larger r'>{{ city.lanes_per_1K|round(1) }}</td>
+							</tr>
+							<tr class='xs-show  {% if loop.index < 0 %}gold{% endif %}'>
+								<td></td>
+								<td colspan='2' class='padding5-b font-smaller'>
+									{{ (city.lanes_length/1000)|round(1) }} км,
+									{{ (city.population/1000)|round(0)|int }} тыс.чел.
+								</td>
+							</tr>
+						{% endfor %}
+					</table>
+				{% endwith %}
+				{# малые города #}
+				{% with extra_class='hidden', cities=small_cities %}
+					<table class='expand js-table {{ extra_class }}'>
+						{% for city in cities %}
+							<tr {% if loop.index < 0 %}class='gold'{% endif %}>
+								<td class='r'>{{ loop.index }}</td>
+								<td class='font-larger'><a href='#' data-extent='[[{{ city.minx }}, {{city.miny}}], [{{ city.maxx }}, {{ city.maxy }}]]' class='js-go-to-city'>{{ city.short_name }}</a></td>
+								<td class='font-larger r'>{{ city.lanes_per_1K|round(1) }}</td>
+							</tr>
+							<tr class='xs-show  {% if loop.index < 0 %}gold{% endif %}'>
+								<td></td>
+								<td colspan='2' class='padding5-b font-smaller'>
+									{{ (city.lanes_length/1000)|round(1) }} км,
+									{{ (city.population/1000)|round(0)|int }} тыс.чел.
+								</td>
+							</tr>
+						{% endfor %}
+					</table>
+				{% endwith %}												
 				<div class='padding5'>
 					{% include 'info.html' %}
 				</div>
@@ -744,11 +810,30 @@
 	Array.prototype.forEach.call(elts, function(e) {
 		var extent = JSON.parse(e.getAttribute('data-extent'));
 		e.addEventListener('click', function() {
-			map.fitBounds(extent, {padding: 20, duration: 10000});
+			map.fitBounds(extent, {padding: 20, duration: 0});
 			return false;
 		});
 	});
 
+	var tables = document.getElementsByClassName('js-table');
+	var table_switch = document.getElementsByClassName('js-table-switch');
+	Array.prototype.forEach.call(table_switch, function(e) {
+		e.addEventListener('click', function() {
+			if (!e.classList.contains('active-switch')) {
+				Array.prototype.forEach.call(table_switch, function(g) { g.classList.toggle('active-switch'); });
+				Array.prototype.forEach.call(tables, function(f) { f.classList.toggle('hidden'); });
+			}
+		});
+	});
+
 	</script>
+
+	<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+	<script type="text/javascript">
+		$(document).on('click', 'tbody tr', function(){
+			$(this).addClass('active').siblings().removeClass('active')
+		})
+	</script>
+
 </body>
 </html>

@@ -15,6 +15,9 @@ POPULATION_PATH = 'src/city-population.csv'
 TEMPLATE_PATH = 'html/index.template.html'
 RESULT_GEOJSON = 'build/bus-lanes.geojson'
 
+# bicycle
+# BICYCLE = 'build/bicycle_lines.csv'
+
 
 WGS = CRS4326 = 'epsg:4326'
 SIB = pyproj.crs.ProjectedCRS(pyproj.crs.coordinate_operation.AlbersEqualAreaConversion(52, 64, 0, 105, 18500000, 0), name='Albers Siberia')
@@ -50,6 +53,8 @@ def download_kml(map_id, file_name):
 
 def short_name(n, pop_df):
 	if n is None:
+		return
+	elif type(n) is float: # added after pandas update
 		return
 
 	l = n.lower().split()
@@ -112,7 +117,11 @@ def kml2gdf():
 	stat_table['lanes_per_1K'] = stat_table.lanes_length / stat_table.population * 1000
 	stat_table.sort_values('lanes_per_1K', ascending=False, inplace=True)
 	stat_table = stat_table.join(stat_table.bounds).drop('geometry', axis=1)
-
+	
 	stat_table.to_csv(STATS_PATH)
+
+	# bicycle path
+	# stat_table = pd.read_csv(BICYCLE)
+
 
 	render(TEMPLATE_PATH, displayed_lanes, stat_table, OUTPUT_PATH)
