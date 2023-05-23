@@ -512,6 +512,10 @@
 		h2 { font-size: 125%; margin: 1.5em 0 .5em; color: #444; font-weight: normal; }
 
 		table tbody tr:hover { background-color: yellow; }
+		tbody tr.active {
+			background: yellow;
+			color: #000;
+		}
 
 		.float-r { float: right; }
 		a { color: hsl(196, 80%, 28%); }
@@ -608,7 +612,7 @@
 			#desktop-table td:last-child { padding-right: .7em; }
 			#desktop-table td:first-child { padding-left: .7em; }
 			#desktop-table table thead { background: #ddd; }
-			table tr.gold { background: #ffd844; }
+			table tr.gold { background: yellow; }
 			table tr:nth-child() { background: #eee; }
 			table tr:nth-child(even).gold { background: #ffd844; }
 
@@ -660,7 +664,7 @@
 					</thead>
 					<tbody>
 						{% for city in cities %}
-							<tr {% if loop.index < 0 %}class='gold'{% endif %}>
+							<tr {% if loop.index < 2 %}class='active'{% endif %}>
 								<td class='r'>{{ loop.index }}</td>
 								<td><a href='#' data-extent='[[{{ city.minx }}, {{city.miny}}], [{{ city.maxx }}, {{ city.maxy }}]]'  class='js-go-to-city under-dash' title='Нажмите чтобы увидеть на карте'>{{ city.short_name }}</a></td>
 								<td class='r xs-hide'>{{ (city.lanes_length/1000)|round(1) }}</td>
@@ -685,7 +689,7 @@
 					</thead>
 					<tbody>
 						{% for city in cities %}
-							<tr {% if loop.index < 0 %}class='gold'{% endif %}>  <!-- remove if statement to remove gold color-->
+							<tr {% if loop.index < 0 %}class='gold'{% endif %}> 
 								<td class='r'>{{ loop.index }}</td>
 								<td><a href='#' data-extent='[[{{ city.minx }}, {{city.miny}}], [{{ city.maxx }}, {{ city.maxy }}]]'  class='js-go-to-city under-dash' title='Нажмите чтобы увидеть на карте'>{{ city.short_name }}</a></td>
 								<td class='r xs-hide'>{{ (city.lanes_length/1000)|round(1) }}</td>
@@ -724,12 +728,12 @@
 				{% with cities=big_cities %}			
 					<table class='expand js-table {{ extra_class }}'>
 						{% for city in cities %}
-							<tr {% if loop.index < 0 %}class='gold'{% endif %}>
+							<tr {% if loop.index < 2 %}class='active'{% endif %}>
 								<td class='r'>{{ loop.index }}</td>
 								<td class='font-larger'><a href='#' data-extent='[[{{ city.minx }}, {{city.miny}}], [{{ city.maxx }}, {{ city.maxy }}]]' class='js-go-to-city'>{{ city.short_name }}</a></td>
 								<td class='font-larger r'>{{ city.lanes_per_1K|round(1) }}</td>
 							</tr>
-							<tr class='xs-show  {% if loop.index < 6 %}gold{% endif %}'>
+							<tr class='xs-show  {% if loop.index < 0 %}gold{% endif %}'>
 								<td></td>
 								<td colspan='2' class='padding5-b font-smaller'>
 									{{ (city.lanes_length/1000)|round(1) }} км,
@@ -743,12 +747,12 @@
 				{% with extra_class='hidden', cities=small_cities %}
 					<table class='expand js-table {{ extra_class }}'>
 						{% for city in cities %}
-							<tr {% if loop.index < 0 %}class='gold'{% endif %}> <!-- navigation bar must bee above tr-->
+							<tr {% if loop.index < 0 %}class='gold'{% endif %}>
 								<td class='r'>{{ loop.index }}</td>
 								<td class='font-larger'><a href='#' data-extent='[[{{ city.minx }}, {{city.miny}}], [{{ city.maxx }}, {{ city.maxy }}]]' class='js-go-to-city'>{{ city.short_name }}</a></td>
 								<td class='font-larger r'>{{ city.lanes_per_1K|round(1) }}</td>
 							</tr>
-							<tr class='xs-show  {% if loop.index < 6 %}gold{% endif %}'>
+							<tr class='xs-show  {% if loop.index < 0 %}gold{% endif %}'>
 								<td></td>
 								<td colspan='2' class='padding5-b font-smaller'>
 									{{ (city.lanes_length/1000)|round(1) }} км,
@@ -823,5 +827,13 @@
 	});
 
 	</script>
+
+	<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+	<script type="text/javascript">
+		$(document).on('click', 'tbody tr', function(){
+			$(this).addClass('active').siblings().removeClass('active')
+		})
+	</script>
+
 </body>
 </html>
